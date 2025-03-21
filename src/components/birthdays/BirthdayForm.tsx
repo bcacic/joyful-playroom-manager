@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { format } from 'date-fns';
@@ -15,7 +14,7 @@ import { Checkbox } from '@/components/ui/checkbox';
 import Card from '@/components/ui/Card';
 import { cn } from '@/lib/utils';
 import { Birthday, BirthdayBoy } from '@/types';
-import { toast } from '@/components/ui/sonner';
+import { toast } from 'sonner';
 
 // Mock data for birthday boys
 const mockBirthdayBoys: BirthdayBoy[] = [

@@ -19,7 +19,7 @@ import {
   AlertDialogTitle, 
   AlertDialogTrigger 
 } from '@/components/ui/alert-dialog';
-import { toast } from '@/components/ui/sonner';
+import { toast } from 'sonner';
 import { Birthday, BirthdayBoy } from '@/types';
 import BirthdayForm from '@/components/birthdays/BirthdayForm';
 

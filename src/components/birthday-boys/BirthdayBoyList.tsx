@@ -1,5 +1,5 @@
 
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Search, Plus, User, Users, Phone } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -101,7 +101,7 @@ const BirthdayBoyList = () => {
         ) : (
           filteredBirthdayBoys.map((boy) => (
             <Link key={boy.id} to={`/birthday-boys/${boy.id}`}>
-              <Card hoverable className="h-full">
+              <Card className="h-full hover:shadow-md transition-shadow">
                 <div className="flex justify-between items-start mb-4">
                   <div className="flex items-center">
                     <div className="bg-primary/10 rounded-full p-3 mr-3">

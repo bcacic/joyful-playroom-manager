@@ -5,7 +5,7 @@ import { Calendar, Search, Plus, Calendar as CalendarIcon, Clock, Users } from '
 import { format, parseISO } from 'date-fns';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import Card from '@/components/ui/Card';
+import { Card } from '@/components/ui/card';
 import StatusBadge from '@/components/ui/StatusBadge';
 import { Birthday, Rodjendan } from '@/types';
 import { birthdayApi } from '@/api/birthdayApi';
@@ -126,7 +126,7 @@ const BirthdayList = () => {
         ) : (
           filteredBirthdays.map((birthday) => (
             <Link key={birthday.id} to={`/birthdays/${birthday.id}`}>
-              <Card hoverable className="h-full">
+              <Card className="h-full p-6 hover:shadow-md hover:-translate-y-1 transition-all duration-200 animate-scale">
                 <div className="flex items-start justify-between mb-4">
                   <div className="flex flex-col">
                     <div className="flex items-center gap-2 mb-2">

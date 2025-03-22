@@ -7,6 +7,9 @@ export interface Slavljenik {
   email: string;
   telefon: string;
   datum?: string | null;
+  napomena?: string;
+  datumKreiranja?: string;
+  datumAzuriranja?: string;
 }
 
 export interface Rodjendan {
@@ -14,6 +17,16 @@ export interface Rodjendan {
   slavljenikSifra: number;
   ime: string;
   datum: string;
+  krajDatum?: string;
+  paket?: 'basic' | 'standard' | 'premium';
+  brojGostiju?: number;
+  status?: 'upcoming' | 'completed' | 'cancelled';
+  cijena?: number;
+  kapara?: number;
+  kaparaPlacena?: boolean;
+  napomena?: string;
+  datumKreiranja?: string;
+  datumAzuriranja?: string;
 }
 
 // UI-specific types with our existing properties

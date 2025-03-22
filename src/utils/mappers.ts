@@ -26,9 +26,9 @@ export const mapToBirthdayBoy = (slavljenik: Slavljenik): BirthdayBoy => {
     age: calculateAge(slavljenik.datum),
     parentName: slavljenik.ime, // Using 'ime' as parent name since API doesn't have separate fields
     parentPhone: slavljenik.telefon,
-    notes: '', // Not in API model
-    createdAt: new Date().toISOString(), // Not in API model
-    updatedAt: new Date().toISOString(), // Not in API model
+    notes: slavljenik.napomena || '',
+    createdAt: slavljenik.datumKreiranja || new Date().toISOString(),
+    updatedAt: slavljenik.datumAzuriranja || new Date().toISOString(),
   };
 };
 
@@ -45,6 +45,7 @@ export const mapToSlavljenik = (birthdayBoy: Partial<BirthdayBoy>): Slavljenik =
     email: '', // Required in API but not in UI model
     telefon: birthdayBoy.parentPhone || '',
     datum: new Date().toISOString(), // Approximation since we only have age in UI model
+    napomena: birthdayBoy.notes,
   };
 };
 
@@ -54,7 +55,14 @@ export const mapToBirthday = (rodjendan: Rodjendan): Birthday => {
   const dateObj = parseISO(rodjendan.datum);
   const formattedDate = format(dateObj, 'yyyy-MM-dd');
   const startTime = format(dateObj, 'HH:mm');
-  const endTime = format(new Date(dateObj.getTime() + 3 * 60 * 60 * 1000), 'HH:mm'); // Default 3 hours
+  
+  // Calculate end time from krajDatum if available, otherwise default to 3 hours later
+  let endTime = '';
+  if (rodjendan.krajDatum) {
+    endTime = format(parseISO(rodjendan.krajDatum), 'HH:mm');
+  } else {
+    endTime = format(new Date(dateObj.getTime() + 3 * 60 * 60 * 1000), 'HH:mm');
+  }
 
   return {
     id: rodjendan.sifra?.toString() || '',
@@ -62,15 +70,15 @@ export const mapToBirthday = (rodjendan: Rodjendan): Birthday => {
     date: formattedDate,
     startTime,
     endTime,
-    packageType: 'standard', // Default value, not in API model
-    guestCount: 10, // Default value, not in API model
-    status: 'upcoming', // Default value, not in API model
-    price: 200, // Default value, not in API model
-    deposit: 50, // Default value, not in API model
-    depositPaid: false, // Default value, not in API model
-    notes: '', // Not in API model
-    createdAt: new Date().toISOString(), // Not in API model
-    updatedAt: new Date().toISOString(), // Not in API model
+    packageType: rodjendan.paket as 'basic' | 'standard' | 'premium' || 'standard',
+    guestCount: rodjendan.brojGostiju || 10,
+    status: rodjendan.status as 'upcoming' | 'completed' | 'cancelled' || 'upcoming',
+    price: rodjendan.cijena || 200,
+    deposit: rodjendan.kapara || 50,
+    depositPaid: rodjendan.kaparaPlacena || false,
+    notes: rodjendan.napomena || '',
+    createdAt: rodjendan.datumKreiranja || new Date().toISOString(),
+    updatedAt: rodjendan.datumAzuriranja || new Date().toISOString(),
   };
 };
 
@@ -85,10 +93,27 @@ export const mapToRodjendan = (birthday: Partial<Birthday>): Rodjendan => {
     dateTimeString = date.toISOString();
   }
 
+  // Combine date and end time for krajDatum
+  let endTimeString = undefined;
+  if (birthday.date && birthday.endTime) {
+    const [hours, minutes] = birthday.endTime.split(':');
+    const date = new Date(birthday.date);
+    date.setHours(parseInt(hours), parseInt(minutes));
+    endTimeString = date.toISOString();
+  }
+
   return {
     sifra: birthday.id ? parseInt(birthday.id) : undefined,
     slavljenikSifra: birthday.birthdayBoyId ? parseInt(birthday.birthdayBoyId) : 0,
-    ime: birthday.notes || 'Birthday Party', // Use notes as name or default
+    ime: birthday.notes || 'Birthday Party',
     datum: dateTimeString,
+    krajDatum: endTimeString,
+    paket: birthday.packageType,
+    brojGostiju: birthday.guestCount,
+    status: birthday.status,
+    cijena: birthday.price,
+    kapara: birthday.deposit,
+    kaparaPlacena: birthday.depositPaid,
+    napomena: birthday.notes,
   };
 };

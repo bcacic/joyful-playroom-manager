@@ -18,3 +18,12 @@ export async function handleResponse<T>(response: Response): Promise<T> {
   // For binary or empty responses
   return {} as T;
 }
+
+// Common fetch options with CORS settings
+export const fetchOptions = {
+  mode: 'cors' as RequestMode,
+  credentials: 'include' as RequestCredentials,
+  headers: {
+    'Content-Type': 'application/json',
+  },
+};

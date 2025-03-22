@@ -1,24 +1,22 @@
 
 import { Rodjendan } from '@/types';
-import { API_BASE_URL, handleResponse } from './config';
+import { API_BASE_URL, handleResponse, fetchOptions } from './config';
 
 export const birthdayApi = {
   getAll: async (): Promise<Rodjendan[]> => {
-    const response = await fetch(`${API_BASE_URL}/api/Rodjendan`);
+    const response = await fetch(`${API_BASE_URL}/api/Rodjendan`, fetchOptions);
     return handleResponse<Rodjendan[]>(response);
   },
 
   getById: async (id: number): Promise<Rodjendan> => {
-    const response = await fetch(`${API_BASE_URL}/api/Rodjendan/${id}`);
+    const response = await fetch(`${API_BASE_URL}/api/Rodjendan/${id}`, fetchOptions);
     return handleResponse<Rodjendan>(response);
   },
 
   create: async (birthday: Rodjendan): Promise<Rodjendan> => {
     const response = await fetch(`${API_BASE_URL}/api/Rodjendan`, {
+      ...fetchOptions,
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
       body: JSON.stringify(birthday),
     });
     return handleResponse<Rodjendan>(response);
@@ -26,10 +24,8 @@ export const birthdayApi = {
 
   update: async (id: number, birthday: Rodjendan): Promise<void> => {
     const response = await fetch(`${API_BASE_URL}/api/Rodjendan/${id}`, {
+      ...fetchOptions,
       method: 'PUT',
-      headers: {
-        'Content-Type': 'application/json',
-      },
       body: JSON.stringify(birthday),
     });
     return handleResponse<void>(response);
@@ -37,6 +33,7 @@ export const birthdayApi = {
 
   delete: async (id: number): Promise<void> => {
     const response = await fetch(`${API_BASE_URL}/api/Rodjendan/${id}`, {
+      ...fetchOptions,
       method: 'DELETE',
     });
     return handleResponse<void>(response);

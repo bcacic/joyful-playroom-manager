@@ -5,6 +5,7 @@ import { CalendarDays, Users, Home, Menu, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import { useIsMobile } from '@/hooks/use-mobile';
+import ThemeToggle from '@/components/ui/ThemeToggle';
 
 const Header = () => {
   const location = useLocation();
@@ -32,9 +33,12 @@ const Header = () => {
 
         {isMobile ? (
           <>
-            <Button variant="ghost" size="icon" onClick={toggleMenu} className="md:hidden">
-              {isMenuOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
-            </Button>
+            <div className="flex items-center gap-4">
+              <ThemeToggle />
+              <Button variant="ghost" size="icon" onClick={toggleMenu} className="md:hidden">
+                {isMenuOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
+              </Button>
+            </div>
 
             {isMenuOpen && (
               <div className="fixed inset-0 top-16 z-50 bg-background animate-fade-in">
@@ -60,26 +64,29 @@ const Header = () => {
             )}
           </>
         ) : (
-          <nav className="hidden md:flex items-center gap-6">
-            {links.map((link) => (
-              <Link 
-                key={link.href} 
-                to={link.href}
-                className={cn(
-                  "flex items-center text-sm font-medium transition-colors",
-                  location.pathname === link.href 
-                    ? "text-foreground" 
-                    : "text-muted-foreground hover:text-foreground"
-                )}
-              >
-                {link.icon}
-                {link.label}
-                {location.pathname === link.href && (
-                  <div className="h-0.5 w-full bg-primary absolute bottom-0 left-0 mt-6" />
-                )}
-              </Link>
-            ))}
-          </nav>
+          <>
+            <nav className="hidden md:flex items-center gap-6">
+              {links.map((link) => (
+                <Link 
+                  key={link.href} 
+                  to={link.href}
+                  className={cn(
+                    "flex items-center text-sm font-medium transition-colors",
+                    location.pathname === link.href 
+                      ? "text-foreground" 
+                      : "text-muted-foreground hover:text-foreground"
+                  )}
+                >
+                  {link.icon}
+                  {link.label}
+                  {location.pathname === link.href && (
+                    <div className="h-0.5 w-full bg-primary absolute bottom-0 left-0 mt-6" />
+                  )}
+                </Link>
+              ))}
+            </nav>
+            <ThemeToggle />
+          </>
         )}
       </div>
     </header>

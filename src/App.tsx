@@ -10,6 +10,7 @@ import BirthdayDetail from "./pages/BirthdayDetail";
 import BirthdayBoys from "./pages/BirthdayBoys";
 import BirthdayBoyDetail from "./pages/BirthdayBoyDetail";
 import NotFound from "./pages/NotFound";
+import { ThemeProvider } from "./contexts/ThemeContext";
 
 // Configure default query client with error handling
 const queryClient = new QueryClient({
@@ -38,19 +39,21 @@ const queryClient = new QueryClient({
 
 const App = () => (
   <QueryClientProvider client={queryClient}>
-    <TooltipProvider>
-      <Toaster />
-      <BrowserRouter>
-        <Routes>
-          <Route path="/" element={<Index />} />
-          <Route path="/birthdays" element={<Birthdays />} />
-          <Route path="/birthdays/:id" element={<BirthdayDetail />} />
-          <Route path="/birthday-boys" element={<BirthdayBoys />} />
-          <Route path="/birthday-boys/:id" element={<BirthdayBoyDetail />} />
-          <Route path="*" element={<NotFound />} />
-        </Routes>
-      </BrowserRouter>
-    </TooltipProvider>
+    <ThemeProvider>
+      <TooltipProvider>
+        <Toaster />
+        <BrowserRouter>
+          <Routes>
+            <Route path="/" element={<Index />} />
+            <Route path="/birthdays" element={<Birthdays />} />
+            <Route path="/birthdays/:id" element={<BirthdayDetail />} />
+            <Route path="/birthday-boys" element={<BirthdayBoys />} />
+            <Route path="/birthday-boys/:id" element={<BirthdayBoyDetail />} />
+            <Route path="*" element={<NotFound />} />
+          </Routes>
+        </BrowserRouter>
+      </TooltipProvider>
+    </ThemeProvider>
   </QueryClientProvider>
 );
 

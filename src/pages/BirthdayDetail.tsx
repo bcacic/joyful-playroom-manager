@@ -1,7 +1,7 @@
 
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
-import { format } from 'date-fns';
+import { format, parseISO } from 'date-fns';
 import { CalendarDays, Clock, Users, CreditCard, Trash2, Pencil, ArrowLeft, User } from 'lucide-react';
 import Layout from '@/components/layout/Layout';
 import Card from '@/components/ui/Card';
@@ -22,87 +22,82 @@ import {
 import { toast } from 'sonner';
 import { Birthday, BirthdayBoy } from '@/types';
 import BirthdayForm from '@/components/birthdays/BirthdayForm';
-
-// Mock data for initial rendering
-const mockBirthday: Birthday = {
-  id: '1',
-  birthdayBoyId: '1',
-  date: '2023-12-15',
-  startTime: '13:00',
-  endTime: '16:00',
-  packageType: 'premium',
-  guestCount: 15,
-  status: 'upcoming',
-  price: 300,
-  deposit: 100,
-  depositPaid: true,
-  notes: 'Bring cake and decorations',
-  createdAt: '2023-11-15T10:00:00Z',
-  updatedAt: '2023-11-15T10:00:00Z',
-};
-
-const mockBirthdayBoys: Record<string, BirthdayBoy> = {
-  '1': {
-    id: '1',
-    name: 'Alex Johnson',
-    age: 7,
-    parentName: 'Sarah Johnson',
-    parentPhone: '555-123-4567',
-    createdAt: '2023-10-15T10:00:00Z',
-    updatedAt: '2023-10-15T10:00:00Z',
-  },
-};
+import { birthdayApi } from '@/api/birthdayApi';
+import { birthdayBoyApi } from '@/api/birthdayBoyApi';
+import { mapToBirthday, mapToBirthdayBoy } from '@/utils/mappers';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 
 const BirthdayDetail = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
-  const [birthday, setBirthday] = useState<Birthday | null>(null);
-  const [birthdayBoy, setBirthdayBoy] = useState<BirthdayBoy | null>(null);
+  const queryClient = useQueryClient();
   const [isEditing, setIsEditing] = useState(false);
-  const [isLoading, setIsLoading] = useState(true);
 
-  useEffect(() => {
-    // In a real app, you would fetch this data from an API
-    const fetchData = async () => {
-      setIsLoading(true);
-      // Simulate API delay
-      await new Promise(resolve => setTimeout(resolve, 800));
+  // Fetch birthday details
+  const { 
+    data: birthday, 
+    isLoading: isLoadingBirthday, 
+    error: birthdayError 
+  } = useQuery({
+    queryKey: ['birthday', id],
+    queryFn: async () => {
+      if (id === 'new') return null;
       
-      if (id === 'new') {
-        setIsEditing(true);
-        setIsLoading(false);
-        return;
+      try {
+        const rodjendan = await birthdayApi.getById(parseInt(id!));
+        return mapToBirthday(rodjendan);
+      } catch (error) {
+        console.error('Error fetching birthday:', error);
+        toast.error('Failed to load birthday details');
+        throw error;
       }
+    },
+    enabled: id !== 'new' && !!id
+  });
+
+  // Fetch birthday boy details if birthday is loaded
+  const { 
+    data: birthdayBoy, 
+    isLoading: isLoadingBirthdayBoy 
+  } = useQuery({
+    queryKey: ['birthdayBoy', birthday?.birthdayBoyId],
+    queryFn: async () => {
+      if (!birthday?.birthdayBoyId) return null;
       
-      // For demo purposes, we're using mock data
-      const foundBirthday = mockBirthday;
-      setBirthday(foundBirthday);
-      
-      if (foundBirthday) {
-        setBirthdayBoy(mockBirthdayBoys[foundBirthday.birthdayBoyId]);
+      try {
+        const slavljenik = await birthdayBoyApi.getById(parseInt(birthday.birthdayBoyId));
+        return mapToBirthdayBoy(slavljenik);
+      } catch (error) {
+        console.error('Error fetching birthday boy:', error);
+        return null;
       }
-      
-      setIsLoading(false);
-    };
+    },
+    enabled: !!birthday?.birthdayBoyId
+  });
 
-    fetchData();
-  }, [id]);
-
-  const handleDelete = async () => {
-    try {
-      // In a real app, you would send a delete request to your API
-      console.log('Deleting birthday:', id);
-      
-      // Simulate API delay
-      await new Promise(resolve => setTimeout(resolve, 800));
-      
+  // Delete mutation
+  const deleteMutation = useMutation({
+    mutationFn: async (id: string) => {
+      return await birthdayApi.delete(parseInt(id));
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['birthdays'] });
       toast.success('Birthday deleted successfully!');
       navigate('/birthdays');
-    } catch (error) {
+    },
+    onError: (error: any) => {
       console.error('Error deleting birthday:', error);
-      toast.error('An error occurred while deleting the birthday.');
+      toast.error('Failed to delete birthday. Please try again.');
+    }
+  });
+
+  const handleDelete = () => {
+    if (id) {
+      deleteMutation.mutate(id);
     }
   };
+
+  const isLoading = isLoadingBirthday || isLoadingBirthdayBoy;
 
   if (isLoading) {
     return (
@@ -141,7 +136,7 @@ const BirthdayDetail = () => {
     );
   }
 
-  if (!birthday) {
+  if (birthdayError || !birthday) {
     return (
       <Layout>
         <div className="text-center py-12">

@@ -1,5 +1,5 @@
 
-import { Toaster } from "@/components/ui/sonner";
+import { Toaster } from "sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
@@ -9,8 +9,28 @@ import BirthdayDetail from "./pages/BirthdayDetail";
 import BirthdayBoys from "./pages/BirthdayBoys";
 import BirthdayBoyDetail from "./pages/BirthdayBoyDetail";
 import NotFound from "./pages/NotFound";
+import { toast } from "sonner";
 
-const queryClient = new QueryClient();
+// Configure default query client with error handling
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      retry: 1,
+      refetchOnWindowFocus: false,
+      staleTime: 5 * 60 * 1000, // 5 minutes
+      onError: (error: any) => {
+        const message = error?.message || 'An unexpected error occurred';
+        toast.error(message);
+      }
+    },
+    mutations: {
+      onError: (error: any) => {
+        const message = error?.message || 'An unexpected error occurred';
+        toast.error(message);
+      }
+    }
+  }
+});
 
 const App = () => (
   <QueryClientProvider client={queryClient}>

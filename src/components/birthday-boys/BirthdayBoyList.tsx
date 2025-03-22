@@ -1,56 +1,65 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { Search, Plus, User, Users, Phone } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import Card from '@/components/ui/Card';
-import { BirthdayBoy } from '@/types';
-
-// Mock data for initial rendering
-const mockBirthdayBoys: BirthdayBoy[] = [
-  {
-    id: '1',
-    name: 'Alex Johnson',
-    age: 7,
-    parentName: 'Sarah Johnson',
-    parentPhone: '555-123-4567',
-    createdAt: '2023-10-15T10:00:00Z',
-    updatedAt: '2023-10-15T10:00:00Z',
-  },
-  {
-    id: '2',
-    name: 'Emily Smith',
-    age: 6,
-    parentName: 'John Smith',
-    parentPhone: '555-987-6543',
-    createdAt: '2023-10-18T10:00:00Z',
-    updatedAt: '2023-10-18T10:00:00Z',
-  },
-  {
-    id: '3',
-    name: 'Michael Brown',
-    age: 8,
-    parentName: 'Jessica Brown',
-    parentPhone: '555-456-7890',
-    notes: 'Allergic to nuts',
-    createdAt: '2023-10-20T10:00:00Z',
-    updatedAt: '2023-10-20T10:00:00Z',
-  },
-];
+import { BirthdayBoy, Slavljenik } from '@/types';
+import { birthdayBoyApi } from '@/api/birthdayBoyApi';
+import { mapToBirthdayBoy } from '@/utils/mappers';
+import { useQuery } from '@tanstack/react-query';
+import { toast } from 'sonner';
 
 const BirthdayBoyList = () => {
   const [searchTerm, setSearchTerm] = useState('');
-  const [birthdayBoys, setBirthdayBoys] = useState<BirthdayBoy[]>(mockBirthdayBoys);
+  
+  // Fetch birthday boys from API
+  const { data: birthdayBoys = [], isLoading, error } = useQuery({
+    queryKey: ['birthdayBoys'],
+    queryFn: async () => {
+      try {
+        const slavljenici = await birthdayBoyApi.getAll();
+        return slavljenici.map(mapToBirthdayBoy);
+      } catch (error) {
+        console.error('Error fetching birthday boys:', error);
+        toast.error('Failed to load birthday boys. Please try again.');
+        throw error;
+      }
+    }
+  });
 
-  // In a real app, you would fetch this data from an API
-  // and implement proper search functionality
-
+  // Filter birthday boys based on search term
   const filteredBirthdayBoys = birthdayBoys.filter(boy =>
     boy.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
     boy.parentName.toLowerCase().includes(searchTerm.toLowerCase()) ||
     boy.parentPhone.includes(searchTerm)
   );
+
+  if (isLoading) {
+    return (
+      <div className="space-y-6">
+        <div className="flex justify-between items-center">
+          <div className="w-72 h-10 bg-gray-200 animate-pulse rounded"></div>
+          <div className="w-40 h-10 bg-gray-200 animate-pulse rounded"></div>
+        </div>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {[1, 2, 3].map((i) => (
+            <div key={i} className="h-64 bg-gray-200 animate-pulse rounded"></div>
+          ))}
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="py-12 text-center">
+        <div className="text-red-500 mb-4">Error loading birthday boys</div>
+        <Button onClick={() => window.location.reload()}>Retry</Button>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6">

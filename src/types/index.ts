@@ -1,5 +1,23 @@
 
-export interface BirthdayBoy {
+// API types matching the swagger definitions
+export interface Slavljenik {
+  sifra?: number;
+  ime: string;
+  prezime: string;
+  email: string;
+  telefon: string;
+  datum?: string | null;
+}
+
+export interface Rodjendan {
+  sifra?: number;
+  slavljenikSifra: number;
+  ime: string;
+  datum: string;
+}
+
+// UI-specific types with our existing properties
+export interface BirthdayBoy extends Partial<Slavljenik> {
   id: string;
   name: string;
   age: number;
@@ -10,7 +28,7 @@ export interface BirthdayBoy {
   updatedAt: string;
 }
 
-export interface Birthday {
+export interface Birthday extends Partial<Rodjendan> {
   id: string;
   birthdayBoyId: string;
   date: string;

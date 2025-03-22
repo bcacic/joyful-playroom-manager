@@ -1,4 +1,5 @@
-import React, { useState } from 'react';
+
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { format } from 'date-fns';
 import { Calendar as CalendarIcon, Clock } from 'lucide-react';
@@ -13,40 +14,12 @@ import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Checkbox } from '@/components/ui/checkbox';
 import Card from '@/components/ui/Card';
 import { cn } from '@/lib/utils';
-import { Birthday, BirthdayBoy } from '@/types';
+import { Birthday, BirthdayBoy, Slavljenik } from '@/types';
 import { toast } from 'sonner';
-
-// Mock data for birthday boys
-const mockBirthdayBoys: BirthdayBoy[] = [
-  {
-    id: '1',
-    name: 'Alex Johnson',
-    age: 7,
-    parentName: 'Sarah Johnson',
-    parentPhone: '555-123-4567',
-    createdAt: '2023-10-15T10:00:00Z',
-    updatedAt: '2023-10-15T10:00:00Z',
-  },
-  {
-    id: '2',
-    name: 'Emily Smith',
-    age: 6,
-    parentName: 'John Smith',
-    parentPhone: '555-987-6543',
-    createdAt: '2023-10-18T10:00:00Z',
-    updatedAt: '2023-10-18T10:00:00Z',
-  },
-  {
-    id: '3',
-    name: 'Michael Brown',
-    age: 8,
-    parentName: 'Jessica Brown',
-    parentPhone: '555-456-7890',
-    notes: 'Allergic to nuts',
-    createdAt: '2023-10-20T10:00:00Z',
-    updatedAt: '2023-10-20T10:00:00Z',
-  },
-];
+import { birthdayApi } from '@/api/birthdayApi';
+import { birthdayBoyApi } from '@/api/birthdayBoyApi';
+import { mapToBirthdayBoy, mapToRodjendan } from '@/utils/mappers';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 
 interface BirthdayFormProps {
   birthday?: Birthday;
@@ -55,8 +28,23 @@ interface BirthdayFormProps {
 
 const BirthdayForm = ({ birthday, isEdit = false }: BirthdayFormProps) => {
   const navigate = useNavigate();
-  const [birthdayBoys] = useState<BirthdayBoy[]>(mockBirthdayBoys);
+  const queryClient = useQueryClient();
   const [isSubmitting, setIsSubmitting] = useState(false);
+  
+  // Fetch birthday boys
+  const { data: birthdayBoys = [], isLoading: isLoadingBirthdayBoys } = useQuery({
+    queryKey: ['birthdayBoys'],
+    queryFn: async () => {
+      try {
+        const slavljenici = await birthdayBoyApi.getAll();
+        return slavljenici.map(mapToBirthdayBoy);
+      } catch (error) {
+        console.error('Error fetching birthday boys:', error);
+        toast.error('Failed to load birthday boys');
+        return [];
+      }
+    }
+  });
   
   // Form state
   const [formData, setFormData] = useState<Partial<Birthday>>(
@@ -75,22 +63,54 @@ const BirthdayForm = ({ birthday, isEdit = false }: BirthdayFormProps) => {
     }
   );
 
+  // Create mutation
+  const createMutation = useMutation({
+    mutationFn: async (data: Partial<Birthday>) => {
+      const rodjendan = mapToRodjendan(data);
+      return await birthdayApi.create(rodjendan);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['birthdays'] });
+      toast.success('Birthday created successfully!');
+      navigate('/birthdays');
+    },
+    onError: (error: any) => {
+      console.error('Error creating birthday:', error);
+      toast.error('Failed to create birthday. Please try again.');
+    }
+  });
+
+  // Update mutation
+  const updateMutation = useMutation({
+    mutationFn: async (data: Partial<Birthday>) => {
+      if (!data.id) throw new Error('ID is required for update');
+      const rodjendan = mapToRodjendan(data);
+      return await birthdayApi.update(parseInt(data.id), rodjendan);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['birthdays'] });
+      toast.success('Birthday updated successfully!');
+      navigate('/birthdays');
+    },
+    onError: (error: any) => {
+      console.error('Error updating birthday:', error);
+      toast.error('Failed to update birthday. Please try again.');
+    }
+  });
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsSubmitting(true);
 
     try {
-      // In a real app, you would send this data to your API
-      console.log('Form data to submit:', formData);
-      
-      // Simulate API delay
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      
-      toast.success(isEdit ? 'Birthday updated successfully!' : 'Birthday created successfully!');
-      navigate('/birthdays');
+      if (isEdit) {
+        await updateMutation.mutateAsync(formData);
+      } else {
+        await createMutation.mutateAsync(formData);
+      }
     } catch (error) {
       console.error('Error submitting form:', error);
-      toast.error('An error occurred. Please try again.');
+      // Error is handled by the mutation
     } finally {
       setIsSubmitting(false);
     }
@@ -111,6 +131,15 @@ const BirthdayForm = ({ birthday, isEdit = false }: BirthdayFormProps) => {
       handleChange('date', format(date, 'yyyy-MM-dd'));
     }
   };
+
+  if (isLoadingBirthdayBoys) {
+    return (
+      <div className="animate-pulse space-y-6">
+        <div className="h-12 bg-gray-200 rounded w-1/3"></div>
+        <div className="h-64 bg-gray-200 rounded"></div>
+      </div>
+    );
+  }
 
   return (
     <form onSubmit={handleSubmit}>

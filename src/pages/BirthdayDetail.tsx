@@ -4,7 +4,7 @@ import { useParams, useNavigate, Link } from 'react-router-dom';
 import { format, parseISO } from 'date-fns';
 import { CalendarDays, Clock, Users, CreditCard, Trash2, Pencil, ArrowLeft, User } from 'lucide-react';
 import Layout from '@/components/layout/Layout';
-import Card from '@/components/ui/Card';
+import { Card } from '@/components/ui/card';
 import PageTitle from '@/components/ui/PageTitle';
 import StatusBadge from '@/components/ui/StatusBadge';
 import { Button } from '@/components/ui/button';

@@ -12,7 +12,7 @@ import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Checkbox } from '@/components/ui/checkbox';
-import Card from '@/components/ui/Card';
+import { Card } from '@/components/ui/card';
 import { cn } from '@/lib/utils';
 import { Birthday, BirthdayBoy, Slavljenik } from '@/types';
 import { toast } from 'sonner';

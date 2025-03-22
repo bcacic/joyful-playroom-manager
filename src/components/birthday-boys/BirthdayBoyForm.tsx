@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
-import Card from '@/components/ui/Card';
+import { Card } from '@/components/ui/card';
 import { BirthdayBoy } from '@/types';
 import { toast } from 'sonner';
 import { birthdayBoyApi } from '@/api/birthdayBoyApi';

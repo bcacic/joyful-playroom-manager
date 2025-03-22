@@ -11,15 +11,19 @@ type ThemeContextType = {
 const ThemeContext = createContext<ThemeContextType | undefined>(undefined);
 
 export function ThemeProvider({ children }: { children: React.ReactNode }) {
-  const [theme, setTheme] = useState<Theme>(() => {
+  // Initialize state with a function to avoid running the check on the server
+  const [theme, setTheme] = useState<Theme>('light');
+  
+  // Run this effect only on the client side
+  useEffect(() => {
     // Check localStorage first
     const savedTheme = localStorage.getItem('theme') as Theme;
     // Then check system preference
-    if (!savedTheme) {
-      return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
-    }
-    return savedTheme;
-  });
+    const initialTheme = savedTheme || 
+      (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+    
+    setTheme(initialTheme);
+  }, []);
 
   useEffect(() => {
     // Update localStorage when theme changes

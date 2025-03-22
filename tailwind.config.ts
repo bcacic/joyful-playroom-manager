@@ -1,3 +1,4 @@
+
 import type { Config } from "tailwindcss";
 
 export default {
@@ -67,6 +68,10 @@ export default {
 				lg: 'var(--radius)',
 				md: 'calc(var(--radius) - 2px)',
 				sm: 'calc(var(--radius) - 4px)'
+			},
+			padding: {
+				'card': '1.5rem', // 24px padding for cards
+				'rounded': '0.625rem', // 10px padding for rounded elements
 			},
 			keyframes: {
 				'accordion-down': {

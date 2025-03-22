@@ -102,6 +102,16 @@
     @apply font-medium tracking-tight;
   }
 
+  /* Card and rounded component padding */
+  .card, .rounded, .rounded-lg, .rounded-md, .rounded-sm, .rounded-full {
+    @apply p-4;
+  }
+
+  /* Overriding card component padding */
+  .card {
+    @apply p-6;
+  }
+
   /* Custom scrollbar */
   ::-webkit-scrollbar {
     width: 8px;
@@ -131,5 +141,16 @@
   
   .page-transition-exit-active {
     @apply opacity-0 transition-opacity duration-300;
+  }
+}
+
+/* Custom utility class for consistent rounded padding */
+@layer utilities {
+  .rounded-padded {
+    @apply rounded-lg p-4;
+  }
+  
+  .card-padded {
+    @apply p-6;
   }
 }
